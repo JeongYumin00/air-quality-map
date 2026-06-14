@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AeroPulse - 실시간 미세먼지 & 위치 시각화 서비스</title>
+  <!-- Google Fonts: Outfit & Noto Sans KR -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Outfit:wght@300;400;600;800&display=swap"
+    rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="theme-unknown">
+
+  <!-- App Container -->
+  <div id="app" class="app-container">
+
+    <!-- Sidebar: 대시보드 카드 영역 -->
+    <aside class="sidebar">
+      <!-- Header -->
+      <header class="app-header">
+        <div class="logo-area">
+          <i class="fa-solid fa-wind logo-icon"></i>
+          <h1>AeroPulse</h1>
+        </div>
+        <button id="btn-open-settings" class="icon-btn" title="API 설정">
+          <i class="fa-solid fa-gear"></i>
+        </button>
+      </header>
+
+      <!-- 사용자 위치 / 현재 측정소 요약 -->
+      <section class="card summary-card fade-in">
+        <div class="card-header-status">
+          <span class="station-badge">
+            <i class="fa-solid fa-location-dot"></i>
+            <span id="txt-station-name">측정소 불러오는 중...</span>
+          </span>
+          <span id="txt-measure-time" class="time-stamp">00:00 기준</span>
+        </div>
+
+        <div class="air-grade-display">
+          <div class="status-icon-wrapper">
+            <i id="img-status-icon" class="fa-solid fa-face-meh status-big-icon"></i>
+          </div>
+          <h2 id="txt-air-grade">불러오는 중</h2>
+          <p id="txt-status-desc" class="status-msg">실시간 대기질 정보를 조회하고 있습니다.</p>
+        </div>
+
+        <div class="location-info">
+          <i class="fa-solid fa-map-pin"></i>
+          <span id="txt-user-address">내 위치 분석 중...</span>
+        </div>
+      </section>
+
+      <!-- 미세먼지 수치 분석 (PM10, PM2.5) -->
+      <section class="card details-card fade-in">
+        <h3>미세먼지 세부 정보</h3>
+
+        <!-- PM10 Gauge -->
+        <div class="pollutant-row">
+          <div class="pollutant-info">
+            <div class="pollutant-meta">
+              <span class="name">미세먼지 <small>PM₁₀</small></span>
+              <span id="txt-pm10-value" class="value">-- <span>㎍/㎥</span></span>
+            </div>
+            <div class="progress-bar-container">
+              <div id="bar-pm10" class="progress-bar" style="width: 0%"></div>
+            </div>
+            <div class="pollutant-status-label">
+              <span id="txt-pm10-grade">보통</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- PM2.5 Gauge -->
+        <div class="pollutant-row">
+          <div class="pollutant-info">
+            <div class="pollutant-meta">
+              <span class="name">초미세먼지 <small>PM₂.₅</small></span>
+              <span id="txt-pm25-value" class="value">-- <span>㎍/㎥</span></span>
+            </div>
+            <div class="progress-bar-container">
+              <div id="bar-pm25" class="progress-bar" style="width: 0%"></div>
+            </div>
+            <div class="pollutant-status-label">
+              <span id="txt-pm25-grade">보통</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 기타 대기 오염 물질 정보 -->
+      <section class="card secondary-card fade-in">
+        <h3>기타 대기 정보</h3>
+        <div class="grid-secondary">
+          <div class="grid-item">
+            <span class="label">오존 (O₃)</span>
+            <span id="txt-o3" class="val">-- ppm</span>
+          </div>
+          <div class="grid-item">
+            <span class="label">이산화질소 (NO₂)</span>
+            <span id="txt-no2" class="val">-- ppm</span>
+          </div>
+          <div class="grid-item">
+            <span class="label">일산화탄소 (CO)</span>
+            <span id="txt-co" class="val">-- ppm</span>
+          </div>
+          <div class="grid-item">
+            <span class="label">아황산가스 (SO₂)</span>
+            <span id="txt-so2" class="val">-- ppm</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 지역 필터 및 제어 영역 -->
+      <section class="card control-card fade-in">
+        <div class="control-grid">
+          <div class="select-wrapper">
+            <label for="select-sido">시도 지역 선택</label>
+            <select id="select-sido">
+              <option value="서울">서울특별시</option>
+              <option value="경기">경기도</option>
+              <option value="인천">인천광역시</option>
+              <option value="부산">부산광역시</option>
+              <option value="대구">대구광역시</option>
+              <option value="광주">광주광역시</option>
+              <option value="대전">대전광역시</option>
+              <option value="울산">울산광역시</option>
+              <option value="세종">세종특별자치시</option>
+              <option value="강원">강원도</option>
+              <option value="충북">충청북도</option>
+              <option value="충남">충청남도</option>
+              <option value="전북">전라북도</option>
+              <option value="전남">전라남도</option>
+              <option value="경북">경상북도</option>
+              <option value="경남">경상남도</option>
+              <option value="제주">제주특별자치도</option>
+            </select>
+          </div>
+          <button id="btn-refresh" class="primary-btn">
+            <i class="fa-solid fa-arrows-rotate"></i>
+            <span>새로고침</span>
+          </button>
+        </div>
+      </section>
+
+      <footer class="sidebar-footer">
+        <p>Data by 에어코리아 | Map by Kakao</p>
+      </footer>
+    </aside>
+
+    <!-- Map: 카카오 지도 영역 -->
+    <main class="map-container">
+      <div id="map"></div>
+
+      <!-- Floating Map Actions -->
+      <div class="map-actions">
+        <button id="btn-my-location" class="map-action-btn" title="내 위치로 이동">
+          <i class="fa-solid fa-crosshairs"></i>
+        </button>
+      </div>
+
+      <!-- 지도 상단 날씨 요약 칩 (데스크톱 전용) -->
+      <div id="map-summary-chip" class="map-summary-chip hide">
+        <span class="chip-title">선택된 측정소:</span>
+        <span id="chip-station-name" class="chip-station">--</span>
+        <span id="chip-station-grade" class="chip-badge badge-normal">보통</span>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="loader-content">
+      <div class="spinner"></div>
+      <p id="txt-loading-message">실시간 위치 및 대기 정보 분석 중...</p>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Settings Modal (Kakao & Public Data API Key 설정) -->
+  <div id="settings-modal" class="modal-overlay">
+    <div class="modal-content card">
+      <div class="modal-header">
+        <h2><i class="fa-solid fa-sliders"></i> API 설정</h2>
+        <button id="btn-close-settings-modal" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="settings-desc">
+          지도를 활성화하기 위해서는 Kakao Map JavaScript API Key 등록이 필요합니다.
+          키는 브라우저의 LocalStorage에 안전하게 저장됩니다.
+        </p>
+
+        <div class="form-group">
+          <label for="input-kakao-key">Kakao Map JavaScript API Key</label>
+          <div class="input-with-icon">
+            <i class="fa-solid fa-key"></i>
+            <input type="password" id="input-kakao-key" placeholder="카카오 개발자 자바스크립트 키 입력">
+          </div>
+          <small class="helper-text">
+            * 카카오 개발자 콘솔에서 플랫폼 도메인(예: <code>http://localhost:포트</code> 또는 <code>http://127.0.0.1:포트</code>)을 등록해야 지도가
+            동작합니다.
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="input-public-key">공공데이터포털 API Key (일반 인증키)</label>
+          <div class="input-with-icon">
+            <i class="fa-solid fa-cloud"></i>
+            <input type="password" id="input-public-key" placeholder="공공데이터포털 대기오염 API 키 입력">
+          </div>
+          <small class="helper-text">
+            * 기본적으로 제공된 키가 사용되지만, 한도 초과 시 개인 키를 입력할 수 있습니다.
+          </small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-save-settings" class="primary-btn">저장 및 적용</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modules -->
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/kakao-map.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>
